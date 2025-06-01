@@ -24,7 +24,6 @@ public class BookManagerSpringApplication implements CommandLineRunner {
 		app.info();
 		boolean isRunning = true;
 		while (isRunning) {
-			app.refresh();
 			app.menu();
 			int option = app.option();
 			switch (option) {
@@ -32,7 +31,6 @@ public class BookManagerSpringApplication implements CommandLineRunner {
 				case 2 -> app.findAllBooks();
 				case 3 -> app.findBookByTitle();
 				case 4 -> app.removeBook();
-				case 5 -> app.refresh();
 				case 0 -> {
 					if (app.quit()) isRunning = false;
 				}

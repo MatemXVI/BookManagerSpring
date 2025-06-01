@@ -3,35 +3,37 @@ package com.example.BookManagerSpring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Scanner;
 
 @Component
 public class BookManagerApp {
 
     private final Scanner scanner = new Scanner(System.in);
-    private final BookController bookController;
-    private final Library library;
+    private final BookService bookService;
 
     @Autowired
-    public BookManagerApp(BookController bookController, Library library) {
-        this.bookController = bookController;
-        this.library = library;
+    public BookManagerApp(BookService bookService) {
+        this.bookService = bookService;
     }
 
 
+    public void separation(){
+        System.out.println("-----------------------------");
+    }
+
     public void info(){
-        String titleApp = "System zarządzania biblioteką";
-        String version = "0.0.1";
-        String author = "Mateusz Milczarek";
-        System.out.println(titleApp);
-        System.out.println("Wersja: " + version + ", " + "Autor: " + author);
+        final String TITLEAPP = "System zarządzania biblioteką";
+        final String VERSION = "0.1.1";
+        final String AUTHOR = "Mateusz Milczarek";
+        System.out.println(TITLEAPP);
+        System.out.println("Wersja: " + VERSION + ", " + "Autor: " + AUTHOR);
     }
     public void menu(){
         System.out.println("1. Dodaj książkę do biblioteki");
         System.out.println("2. Wyświetl listę wszystkich książek");
         System.out.println("3. Wyszukaj książkę po tytule");
         System.out.println("4. Usuń książkę po tytule");
-        System.out.println("5. Odśwież bazę książek");
         System.out.println("0. Wyjście");
     }
     public int option(){
@@ -59,48 +61,54 @@ public class BookManagerApp {
         }
     }
 
-    public void refresh(){
-       bookController.refresh();
-    }
-
-
     //1.
     public void addBook(){
         String title = title();
         String author = author();
         int year = year();
-        bookController.save(new Book(title, author, year));
+        if (!bookService.existsByTitle(title)) {
+                bookService.save(new Book(title, author, year));
+                System.out.println("Dodano książkę do biblioteki.");
+        }else{
+                System.out.println("Taka książka już istnieje.");
+        }
+        separation();
     }
     //2.
     public void findAllBooks(){
-        if(!library.getBooks().isEmpty()){
+        List<Book> books =  bookService.selectAll();
+        if(books != null){
             int i = 0;
-            for(Book book : library.getBooks()){
+            for(Book book : books){
                 i++;
-                System.out.println(i++ + ". " + book.getTitle() + ", " + book.getAuthor() + ", " + book.getYear());
+                System.out.println(i + ". " + book.getTitle() + ", " + book.getAuthor() + ", " + book.getYear());
             }
         }else{
-            System.out.println("Lista książek jest pusta");
+            System.out.println("Nie znaleziono żadnej książki");
         }
+        separation();
     }
     //3.
     public void findBookByTitle(){
         String title = title();
-        bookController.selectByTitle(title);
-        Book book = library.findBookByTitle(title);
-        if(book != null)
-            System.out.println(book);
+        List<Book> books =  bookService.selectByTitle(title);
+        if(!books.isEmpty()){
+            for(Book book : books) {
+                System.out.println(book.getTitle() + ", " + book.getAuthor() + ", " + book.getYear());
+            }
+        }
         else
             System.out.println("Nie znaleziono książki.");
+        separation();
     }
     //4.
     public void removeBook(){
         String title = title();
-        bookController.delete(title);
-        if(library.removeBook(title))
+        if(bookService.delete(title))
             System.out.println("Książka usunięta pomyślnie");
         else
             System.out.println("Brak podanej książki do usunięcia");
+        separation();
     }
     //QUIT
     public boolean quit(){
